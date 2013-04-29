@@ -80,7 +80,7 @@ class CRM_Core_I18n {
       require_once 'PHPgettext/streams.php';
       require_once 'PHPgettext/gettext.php';
 
-      $streamer = new FileReader($config->gettextResourceDir . $locale . DIRECTORY_SEPARATOR . 'civicrm.mo');
+      $streamer = new FileReader($config->gettextResourceDir . $locale . DIRECTORY_SEPARATOR . 'LC_MESSAGES' . DIRECTORY_SEPARATOR . 'civicrm.mo');
       $this->_phpgettext = new gettext_reader($streamer);
     }
   }
