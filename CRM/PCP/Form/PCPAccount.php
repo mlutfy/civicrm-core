@@ -111,7 +111,7 @@ class CRM_PCP_Form_PCPAccount extends CRM_Core_Form {
     if (!$this->_contactID) {
       return;
     }
-    $stateCountryMap = array();
+
     foreach ($this->_fields as $name => $dontcare) {
       $fields[$name] = 1;
     }
@@ -127,21 +127,8 @@ class CRM_PCP_Form_PCPAccount extends CRM_Core_Form {
           );
         }
       }
-      if ((substr($name, 0, 14) === 'state_province') || (substr($name, 0, 7) === 'country') || (substr($name, 0, 6) === 'county')) {
-        list($fieldName, $index) = CRM_Utils_System::explode('-', $name, 2);
-        if (!array_key_exists($index, $stateCountryMap)) {
-          $stateCountryMap[$index] = array();
-        }
-        $stateCountryMap[$index][$fieldName] = $name;
-      }
-
-      // also take care of state country widget
-      if (!empty($stateCountryMap)) {
-        CRM_Core_BAO_Address::addStateCountryMap($stateCountryMap, $this->_defaults);
-      }
     }
-    // now fix all state country selectors
-    CRM_Core_BAO_Address::fixAllStateSelects($this, $this->_defaults);
+
     return $this->_defaults;
   }
 
@@ -152,6 +139,8 @@ class CRM_PCP_Form_PCPAccount extends CRM_Core_Form {
    * @access public
    */
   public function buildQuickForm() {
+    $stateCountryMap = array();
+
     $id = CRM_PCP_BAO_PCP::getSupporterProfileId($this->_pageId, $this->_component);
     if (CRM_PCP_BAO_PCP::checkEmailProfile($id)) {
       $this->assign('profileDisplay', TRUE);
@@ -182,7 +171,23 @@ class CRM_PCP_Form_PCPAccount extends CRM_Core_Form {
         if ($field['add_captcha']) {
           $addCaptcha = TRUE;
         }
+
+        list($prefixName, $index) = CRM_Utils_System::explode('-', $key, 2);                   
+        if ($prefixName == 'state_province' || $prefixName == 'country' || $prefixName == 'county') {
+          if (!array_key_exists($index, $stateCountryMap)) {
+            $stateCountryMap[$index] = array();                                                
+          }                                                                                    
+          $stateCountryMap[$index][$prefixName] = $key;                                        
+        }
+
+        // also take care of state country widget
+        if (!empty($stateCountryMap)) {
+          CRM_Core_BAO_Address::addStateCountryMap($stateCountryMap, $this->_defaults);
+        }
       }
+
+      // now fix all state country selectors
+      CRM_Core_BAO_Address::fixAllStateSelects($this, $this->_defaults);
 
       if ($addCaptcha) {
         $captcha = &CRM_Utils_ReCAPTCHA::singleton();
