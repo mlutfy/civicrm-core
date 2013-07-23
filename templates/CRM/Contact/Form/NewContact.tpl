@@ -106,38 +106,40 @@
       open: function() {
         cj.getJSON(CRM.url('civicrm/profile/create', params))
           .done(function(response) {
-            cj('#contact-dialog-' + prefix + blockNo).html(response.content);
-
-            cj('.crm-container-snippet .cancel.form-submit').click(function() {
-              cj('#contact-dialog-' + prefix + blockNo).dialog('close');
-              return false;
-            });
-            cj('#contact-dialog-' + prefix + blockNo + ' #Edit').ajaxForm({
-              url: url + '&context=dialog',
-              dataType: 'json',
-              success: function(response) {
-                if (response.newContactSuccess) {
-                  cj('#' + prefix + 'contact_' + blockNo).val(response.sortName).focus( );
+            function crm_dialog_update(response) {
+              cj('#contact-dialog-' + prefix + blockNo).html(response.content);
   
-                  if (typeof(allowMultiClient) != "undefined") {
-                    if (allowMultiClient) {
-                      cj('#' + prefix + 'contact_' + blockNo).tokenInput("add", {id: response.contactID, name: response.sortName});
-                    }
-                  }
-                  cj('input[name="' + prefix + 'contact_select_id[' + blockNo +']"]').val(response.contactID);
-  
-                  cj('#contact-dialog-' + prefix + blockNo).dialog('close');
-                  // should use response.displayName, but in 4.3 is not available?
-                  CRM.alert(ts('%1 has been created.', {1: response.sortName}), ts('Contact Saved'), 'success');
-                }
-                else {
-                  cj.each(response.errors, function(i, error) {
-                    CRM.alert(error, ts('Found matching contacts'), 'error');
-                  });
-                }
+              cj('.crm-container-snippet .cancel.form-submit').click(function() {
+                cj('#contact-dialog-' + prefix + blockNo).dialog('close');
                 return false;
-              }
-            }).validate(CRM.validate.params);
+              });
+              cj('#contact-dialog-' + prefix + blockNo + ' #Edit').ajaxForm({
+                url: url + '&context=dialog',
+                dataType: 'json',
+                success: function(response) {
+                  if (response.newContactSuccess) {
+                    cj('#' + prefix + 'contact_' + blockNo).val(response.sortName).focus( );
+    
+                    if (typeof(allowMultiClient) != "undefined") {
+                      if (allowMultiClient) {
+                        cj('#' + prefix + 'contact_' + blockNo).tokenInput("add", {id: response.contactID, name: response.sortName});
+                      }
+                    }
+                    cj('input[name="' + prefix + 'contact_select_id[' + blockNo +']"]').val(response.contactID);
+    
+                    cj('#contact-dialog-' + prefix + blockNo).dialog('close');
+                    // should use response.displayName, but in 4.3 is not available?
+                    CRM.alert(ts('%1 has been created.', {1: response.sortName}), ts('Contact Saved'), 'success');
+                  }
+                  else {
+                    // We receive an HTML response when there are errors (ex: duplicate found)
+                    crm_dialog_update(response);
+                  }
+                  return false;
+                }
+              }).validate(CRM.validate.params);
+            }
+            crm_dialog_update(response);
           });
       },
       close: function(event, ui) {
