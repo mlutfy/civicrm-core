@@ -374,25 +374,6 @@ SELECT module
   function validate() {
     $errors = parent::validate();
 
-    // this is special case when we create contact using Dialog box
-/*
-    if ($this->_context == 'dialog') {
-watchdog('civicrm', print_r($errors, 1));
-watchdog('civicrm', print_r($this->_errors, 1));
-      $returnArray = array(
-        'newContactSuccess' => FALSE,
-        'errors' => array(),
-      );
-
-      foreach ($this->_errors as $name => $mess) {
-        $returnArray['errors'][] = $mess;
-      }
-
-      echo json_encode($returnArray);
-      CRM_Utils_System::civiExit();
-    }
-*/
-
     if (!$errors && CRM_Utils_Array::value('errorURL', $_POST)) {
       $message = NULL;
       foreach ($this->_errors as $name => $mess) {
