@@ -74,33 +74,79 @@
     }
   });
 
-  function newContact{/literal}{$prefix}{$blockNo}{literal}( gid, blockNo, prefix ) {
-    var dataURL = {/literal}"{crmURL p='civicrm/profile/create' q="reset=1&snippet=5&context=dialog&blockNo=$blockNo&prefix=$prefix" h=0 }"{literal};
-    dataURL = dataURL + '&gid=' + gid;
-    {/literal}{if $profileCreateCallback}{literal}
-    dataURL = dataURL + '&createCallback=1';
-    {/literal}{/if}{literal}
-    cj.ajax({
-      url: dataURL,
-      success: function( content ) {
-        cj( '#contact-dialog-'+ prefix + blockNo ).show( ).html( content ).dialog({
-          title: "{/literal}{ts escape='js'}Create New Contact{/ts}{literal}",
-          modal: true,
-          width: 680,
-          overlay: {
-            opacity: 0.5,
-            background: "black"
-          },
+  function newContact{/literal}{$prefix}{$blockNo}{literal}(gid, blockNo, prefix) {
+    var blockNo = {/literal}{$blockNo}{literal};
+    var prefix = {/literal}"{$prefix}"{literal};
 
-          close: function(event, ui) {
-            cj('#' + prefix + 'profiles_' + blockNo).val('');
-            {/literal}
-            {if $newContactCallback}
-              eval("{$newContactCallback}");
-            {/if}
-            {literal}
-          }
-        });
+    // NB: the blockNo and prefix variables do not seem to do anything
+    var params = {
+      reset: 1,
+      snippet: 6,
+      gid: gid,
+      blockNo: blockNo,
+      prefix: prefix
+    }
+
+    {/literal}{if $profileCreateCallback}{literal}
+      params['createCallback'] = 1;
+    {/literal}{/if}{literal}
+
+    var url = CRM.url('civicrm/profile/create', params);
+
+    // CRM-12927 Copied the method for using ajaxForm from civivolunteer
+    // https://github.com/civicrm/civivolunteer/blob/master/js/apps/assign/assign_views.js#L129
+    cj('#contact-dialog-' + prefix + blockNo).dialog({
+      title: "{/literal}{ts escape='js'}Create New Contact{/ts}{literal}",
+      modal: true,
+      minWidth: 680,
+      overlay: {
+        opacity: 0.5,
+        background: "black"
+      },
+      open: function() {
+        cj.getJSON(CRM.url('civicrm/profile/create', params))
+          .done(function(response) {
+            cj('#contact-dialog-' + prefix + blockNo).html(response.content);
+
+            cj('.crm-container-snippet .cancel.form-submit').click(function() {
+              cj('#contact-dialog-' + prefix + blockNo).dialog('close');
+              return false;
+            });
+            cj('#contact-dialog-' + prefix + blockNo + ' #Edit').ajaxForm({
+              url: url + '&context=dialog',
+              dataType: 'json',
+              success: function(response) {
+                if (response.newContactSuccess) {
+                  cj('#' + prefix + 'contact_' + blockNo).val(response.sortName).focus( );
+  
+                  if (typeof(allowMultiClient) != "undefined") {
+                    if (allowMultiClient) {
+                      cj('#' + prefix + 'contact_' + blockNo).tokenInput("add", {id: response.contactID, name: response.sortName});
+                    }
+                  }
+                  cj('input[name="' + prefix + 'contact_select_id[' + blockNo +']"]').val(response.contactID);
+  
+                  cj('#contact-dialog-' + prefix + blockNo).dialog('close');
+                  // should use response.displayName, but in 4.3 is not available?
+                  CRM.alert(ts('%1 has been created.', {1: response.sortName}), ts('Contact Saved'), 'success');
+                }
+                else {
+                  cj.each(response.errors, function(i, error) {
+                    CRM.alert(error, ts('Found matching contacts'), 'error');
+                  });
+                }
+                return false;
+              }
+            }).validate(CRM.validate.params);
+          });
+      },
+      close: function(event, ui) {
+        cj('#' + prefix + 'profiles_' + blockNo).val('');
+        {/literal}
+        {if $newContactCallback}
+          eval("{$newContactCallback}");
+        {/if}
+        {literal}
       }
     });
   }
