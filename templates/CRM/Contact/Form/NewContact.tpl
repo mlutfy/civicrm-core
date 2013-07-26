@@ -104,6 +104,7 @@
         background: "black"
       },
       open: function() {
+        cj('#contact-dialog-' + prefix + blockNo).html('{/literal}{ts}Loading{/ts}{literal}' + '...');
         cj.getJSON(CRM.url('civicrm/profile/create', params))
           .done(function(response) {
             function crm_dialog_update(response) {
