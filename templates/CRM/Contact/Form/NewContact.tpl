@@ -138,7 +138,7 @@
                   }
                   return false;
                 }
-              }).validate(CRM.validate.params);
+              });
             }
             crm_dialog_update(response);
           });
