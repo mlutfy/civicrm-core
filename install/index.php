@@ -1347,6 +1347,13 @@ class Installer extends InstallRequirements {
         //add basic drupal permissions
         civicrm_install_set_drupal_perms();
 
+        // Localisation settings
+        $params = array(
+          'lcMessages' => $config['seedLanguage'],
+        );
+
+        civicrm_api3('Setting', 'create', $params);
+
         // restore the user.
         $GLOBALS['user'] = $original_user;
         drupal_save_session(TRUE);
