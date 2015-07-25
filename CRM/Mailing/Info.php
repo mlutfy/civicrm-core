@@ -144,6 +144,8 @@ class CRM_Mailing_Info extends CRM_Core_Component_Info {
     $fromAddress = civicrm_api3('OptionValue', 'get', $params + array(
       'option_group_id' => "from_email_address",
     ));
+    $enabledLanguages = CRM_Core_I18n::languages(TRUE);
+    $isMultiLingual = (count($enabledLanguages) > 1);
     CRM_Core_Resources::singleton()
       ->addSetting(array(
         'crmMailing' => array(
@@ -165,6 +167,8 @@ class CRM_Mailing_Info extends CRM_Core_Component_Info {
             )),
           'visibility' => CRM_Utils_Array::makeNonAssociative(CRM_Core_SelectValues::groupVisibility()),
           'workflowEnabled' => CRM_Mailing_Info::workflowEnabled(),
+          'enabledLanguages' => $enabledLanguages,
+          'isMultiLingual' => $isMultiLingual,
         ),
       ))
       ->addPermissions(array(

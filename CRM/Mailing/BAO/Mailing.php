@@ -2480,6 +2480,7 @@ LEFT JOIN civicrm_mailing_group g ON g.mailing_id   = m.id
                         $mailing.scheduled_id as scheduled_id,
                         $mailing.is_archived as archived,
                         $mailing.created_date as created_date,
+                        $mailing.language as language,
                         campaign_id,
                         $mailing.sms_provider_id as sms_provider_id
             FROM        $mailing
@@ -2529,6 +2530,7 @@ LEFT JOIN civicrm_mailing_group g ON g.mailing_id   = m.id
         'campaign_id' => $dao->campaign_id,
         'campaign' => empty($dao->campaign_id) ? NULL : $allCampaigns[$dao->campaign_id],
         'sms_provider_id' => $dao->sms_provider_id,
+        'language' => $dao->language,
       );
     }
     return $rows;
