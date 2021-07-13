@@ -831,8 +831,6 @@ class CRM_Profile_Form extends CRM_Core_Form {
     // if false, user is not logged-in.
     $anonUser = FALSE;
     if (!$this->_currentUserID) {
-      $defaultLocationType = CRM_Core_BAO_LocationType::getDefault();
-      $primaryLocationType = $defaultLocationType->id;
       $anonUser = TRUE;
     }
     $this->assign('anonUser', $anonUser);
@@ -868,7 +866,7 @@ class CRM_Profile_Form extends CRM_Core_Form {
         $addCaptcha[$field['group_id']] = $field['add_captcha'];
       }
 
-      if (($name == 'email-Primary') || ($name == 'email-' . ($primaryLocationType ?? ""))) {
+      if (substr($name, 0, 6) == 'email-') {
         $emailPresent = TRUE;
         $this->_mail = $name;
       }

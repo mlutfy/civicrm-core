@@ -131,8 +131,10 @@
     {ts}If the 'Email Verification' option is enabled, users will receive a welcome email from Drupal with login information. Otherwise they will select a Password inline, and if administrator approval is not required they will be automatically logged in as soon as the transaction is completed.{/ts}
 {elseif $config->userFramework EQ 'Joomla'}
     {ts}This feature requires the 'Allow User Registration' setting to be 'Yes' in Joomla Global Configuration >> System Settings.{/ts}
+{elseif $config->userFramework EQ 'WordPress'}
+    {ts}This feature requires the 'Anyone can register' setting to be enabled in WordPress under Settings >> General.{/ts}
 {/if}
- {ts}In addition, you must include a Primary Email Address field in the profile.{/ts}
+ {ts}In addition, you must include an Email Address field in the profile.{/ts}
 {/htxt}
 
 {htxt id='id-is_update_dupe-title'}
