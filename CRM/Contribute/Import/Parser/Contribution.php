@@ -232,7 +232,19 @@ class CRM_Contribute_Import_Parser_Contribution extends CRM_Import_Parser {
         $params[$entity][$this->getFieldMetadata($mappedField['name'])['name']] = $this->getTransformedFieldValue($mappedField['name'], $fieldValue);
       }
     }
-    return $params;
+    return $this->removeEmptyValues($params);
+  }
+
+  protected function removeEmptyValues($array) {
+    foreach ($array as $key => $value) {
+      if (is_array($value)) {
+        $array[$key] = $this->removeEmptyValues($value);
+      }
+      elseif ($value === '') {
+        unset($array[$key]);
+      }
+    }
+    return $array;
   }
 
   /**
@@ -433,12 +445,10 @@ class CRM_Contribute_Import_Parser_Contribution extends CRM_Import_Parser {
 
       $softCreditParams = [];
       foreach ($params['SoftCreditContact'] ?? [] as $index => $softCreditContact) {
-        if (!empty($softCreditContact['Contact']['id'])) {
-          $softCreditParams[$index]['soft_credit_type_id'] = $softCreditContact['soft_credit_type_id'];
-          $softCreditParams[$index]['contact_id'] = $this->getContactID($softCreditContact['Contact'], $softCreditContact['Contact']['id'] ?? NULL, 'SoftCreditContact', $this->getDedupeRulesForEntity('SoftCreditContact'));
-          if (empty($softCreditParams[$index]['contact_id']) && in_array($this->getActionForEntity('SoftCreditContact'), ['update', 'select'])) {
-            throw new CRM_Core_Exception(ts('Soft Credit Contact not found'));
-          }
+        $softCreditParams[$index]['soft_credit_type_id'] = $softCreditContact['soft_credit_type_id'];
+        $softCreditParams[$index]['contact_id'] = $this->getContactID($softCreditContact['Contact'], !empty($softCreditContact['Contact']['id']) ? $softCreditContact['Contact']['id'] : NULL, 'SoftCreditContact', $this->getDedupeRulesForEntity('SoftCreditContact'));
+        if (empty($softCreditParams[$index]['contact_id']) && in_array($this->getActionForEntity('SoftCreditContact'), ['update', 'select'])) {
+          throw new CRM_Core_Exception(ts('Soft Credit Contact not found'));
         }
       }
 
